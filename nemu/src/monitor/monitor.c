@@ -15,7 +15,7 @@
 
 #include <isa.h>
 #include <memory/paddr.h>
-#include <cpu/cpu.h>
+
 
 
 void init_rand();
