@@ -20,12 +20,7 @@ NEMUState nemu_state = { .state = NEMU_STOP };
 int is_exit_status_bad() {
   int good = (nemu_state.state == NEMU_END && nemu_state.halt_ret == 0) ||
     (nemu_state.state == NEMU_QUIT);
-  if(!good) {
-    printf(ANSI_FG_RED "Exit status: %s\n" ANSI_NONE,
-    nemu_state.state == NEMU_END ? "FAIL" : "ABORT");
-  }
-  
-
+    
   return !good;
   
 }
