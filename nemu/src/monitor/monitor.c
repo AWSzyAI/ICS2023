@@ -15,6 +15,8 @@
 
 #include <isa.h>
 #include <memory/paddr.h>
+#include <cpu/cpu.h>
+
 
 void init_rand();
 void init_log(const char *log_file);
@@ -34,7 +36,7 @@ static void welcome() {
   printf("For help, type \"help\"\n");
   // Log("Exercise: Please remove me in the source code and compile NEMU again.");
   
-  // nemu_state.state = NEMU_STOP;
+  nemu_state.state = NEMU_STOP;
   // assert(0);
 }
 
