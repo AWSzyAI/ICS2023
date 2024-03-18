@@ -18,6 +18,7 @@
 #include <readline/readline.h>
 #include <readline/history.h>
 #include "sdb.h"
+#include <memory/paddr.h>
 
 static int is_batch_mode = false;
 
@@ -54,6 +55,75 @@ static int cmd_q(char *args) {
 
 static int cmd_help(char *args);
 
+static int cmd_si(char *args){
+  char *arg = strtok(NULL, " ");
+  int n = 1;
+  if (arg != NULL) {
+    sscanf(arg, "%d", &n);
+  }
+  cpu_exec(n);
+  return 0;
+}
+
+static int cmd_info(char *args){
+  char *arg = strtok(NULL, " ");
+  if (arg == NULL) {
+    printf("Please input r/w\n");
+    return 0;
+  }
+  if (strcmp(arg, "r") == 0) {
+    isa_reg_display();
+  }else {
+    printf("Please input r/w\n");
+  }
+  return 0;
+}
+
+
+// [x] 规定表达式EXPR中只能是一个十六进制数
+// [ ]调用表达式求值函数
+static int cmd_x(char *args){
+  // read arg: n
+  char *arg = strtok(NULL, " ");
+  int n = 1;
+  if (arg == NULL) {
+    printf("Please input n\n");
+    return 0;
+  }
+  sscanf(arg, "%d", &n);
+  // read arg: EXPR
+  arg = strtok(NULL, " ");
+  if (arg == NULL) {
+    printf("Please input EXPR\n");
+    return 0;
+  }
+  // EXPR -> addr
+  // 使用循环将指定长度的内存数据通过十六进制打印出来
+  paddr_t addr = 0;
+  sscanf(arg, "%x", &addr);
+  
+  for(int i=0;i<n;i++){
+    word_t value = paddr_read(addr, 4);
+    printf("0x%08x: ", addr);
+    for (int j = 0; j < 4; j++) {
+      printf("%02x ", (value >> (j * 8)) & 0xFF); // 输出每个字节的十六进制形式
+    }
+    // 输出每个字节的字符形式
+    for (int j = 0; j < 4; j++) {
+      char ch = (value >> (j * 8)) & 0xFF;
+      if (ch >= 32 && ch <= 126) {
+        printf("%c", ch);
+      } else {
+        printf(".");
+      }
+    }
+    printf("\n");
+    addr += 4;
+  }
+  return 0;
+}
+
+
 static struct {
   const char *name;
   const char *description;
@@ -64,6 +134,11 @@ static struct {
   { "q", "Exit NEMU", cmd_q },
 
   /* TODO: Add more commands */
+  /* cmd_table[i].handler(args)*/
+  { "si", "[n] Single step execution, dufault n = 1", cmd_si },
+  { "info", "r Print register", cmd_info },
+  //{ "info", "r/w Print register/watch point state", cmd_info },
+  { "x", "[n] Scan memory. Evaluate the expression EXPR and use the result as the starting memory Address, output N consecutive 4 bytes in hexadecimal form", cmd_x },
 
 };
 
